@@ -1,0 +1,53 @@
+openapi: 3.0.1
+info:
+  title: Printing forms
+  description: First version of printing forms application
+  contact:
+    name: Dmitry molchanov
+    email: idmitrymolchanov@gmail.com
+  version: 1.0.0
+  x-audience: external-public
+  x-api-id: 78e624f8-f73e-4bbe-a918-bda261fd13ec
+servers:
+- url: http://localhost:8080
+  description: dev
+paths:
+  /source/id/{id}/format/{format}/data/{data}:
+    get:
+      summary: Get id of the required report
+      operationId: getReportId
+      parameters:
+      - name: id
+        in: path
+        description: id of the required report
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: format
+        in: path
+        description: format of the required report
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: data
+        in: path
+        description: parameters for report
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+components: {}
