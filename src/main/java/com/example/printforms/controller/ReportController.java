@@ -1,13 +1,19 @@
 package com.example.printforms.controller;
 
+import com.example.printforms.model.Item;
+import com.example.printforms.service.error.PrintedFormsException;
+import com.example.printforms.service.reports.ReportFormat;
 import com.example.printforms.service.reports.ReportService;
 import lombok.extern.slf4j.Slf4j;
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Base64;
+import java.io.FileNotFoundException;
 import java.util.List;
+import java.util.Locale;
 
 @Slf4j
 @RestController
@@ -20,27 +26,36 @@ public class ReportController {
         this.service = service;
     }
 
-    @PostMapping("/generate/id/{id}/format/{format}/data/{data}")
-    public byte[] getReport(@PathVariable("id") String reportId,
-                            @PathVariable("format") String reportFormat,
-                            //                           @PathVariable("data") byte[] reportData)
-                            @RequestBody List<Item> items)
-            {
+    @PostMapping(value = "/reports/{reportId}/generate", produces = {MediaType.TEXT_PLAIN_VALUE})
+    public ResponseEntity<byte[]> getReport(@PathVariable("reportId") String reportId,
+                                                         @RequestParam() ReportFormat format,
+                                                         @RequestBody List<Item> items) throws PrintedFormsException
+    {
+        byte[] reportBase64;
+        reportBase64 = service.getReport(reportId, format, items);
 
-//        System.out.println(reportId + " " + reportFormat);
-//        byte[] decoded = Base64.getDecoder().decode(reportData);
-//
-//        //JSONObject jsonObject = new JSONObject(new String(decoded));
-//        try {
-//            //String reportDataDecoded = jsonObject.toString();
-//            //System.out.println(reportDataDecoded);
-//            return service.getReportInBase64(reportId, reportFormat, new String(decoded));
-//        }
-//        catch (Exception ignored) {
-//
-//        }
-//        log.error("error");
-        return null;
+        var headers = new HttpHeaders();
+        headers.add("Content-Disposition",
+                    "inline; filename="+reportId+"."+format.name().toLowerCase(Locale.ROOT)+"");
+        headers.add("Content-Type", "text/plain");;
+
+        return ResponseEntity
+                .ok()
+                .headers(headers)
+                .contentType(MediaType.TEXT_PLAIN)
+                .body(reportBase64);
     }
 
+    @PostMapping(value = "/reports/{reportId}/generateId", produces = {MediaType.TEXT_PLAIN_VALUE})
+    public ResponseEntity<String> getReportId(@PathVariable("reportId") String reportId,
+                                              @RequestParam() ReportFormat format,
+                                              @RequestBody List<Item> items) throws PrintedFormsException
+    {
+
+        String createdReportId = service.getReportId(reportId, format, items);
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.TEXT_PLAIN)
+                .body(createdReportId);
+    }
 }

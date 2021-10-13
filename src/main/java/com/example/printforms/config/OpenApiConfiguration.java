@@ -14,7 +14,7 @@ public class OpenApiConfiguration {
     @Bean
     public GroupedOpenApi publicUserApi() {
         return GroupedOpenApi.builder()
-                .group("Users")
+                .group("Reports")
                 .pathsToMatch("/report/**")
                 .build();
     }
